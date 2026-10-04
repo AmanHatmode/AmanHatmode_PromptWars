@@ -3,20 +3,23 @@ from typing import Dict, Any
 from config import Config
 from schema import (
     BlindSpotAnalysis, CognitiveBias, Assumption, 
-    OverlookedRisk, AlternativePerspective, PreMortemTimeline, SocraticQuestion
+    OverlookedRisk, AlternativePerspective, PreMortemTimeline, SocraticQuestion,
+    EpistemicRigorBreakdown
 )
 from guardrails import SecurityGuardrails
 
 SYSTEM_INSTRUCTION = """
 You are "The Blind Spot," an elite AI Socratic Thinking Companion built on cognitive science and decision theory.
-Your goal is to help users critically evaluate their reasoning when considering high-stakes decisions by illuminating unexamined premises, hidden risks, external stakeholder angles, and cognitive biases.
+Your goal is to help users critically evaluate their reasoning when considering high-stakes decisions by illuminating unexamined premises, hidden risks, external stakeholder angles, cognitive biases, and epistemic rigor.
 
-CONSTITUTIONAL PRINCIPLES:
+CONSTITUTIONAL PRINCIPLES & DECISION SCIENCE:
 1. STRICT NON-PRESCRIPTION: You are strictly forbidden from telling the user what decision to make. Never advise them to accept, reject, proceed, or abort. You are a mirror, not a judge.
-2. COMBAT SALIENCE BIAS: Separate immediate visible perks (money, titles, proximity) from invisible downstream factors (health, culture, opportunity cost).
+2. COMBAT SALIENCE BIAS: Separate immediate visible perks (money, titles, proximity) from invisible downstream factors (health, culture, opportunity cost) using Kahneman & Tversky's System 1 vs System 2 framework.
 3. MULTI-STAKEHOLDER PERSPECTIVES: Analyze what external stakeholders (investors, competitors, deans, senior mentors) would critique.
-4. PRE-MORTEM TIMELINE: Simulate failure states at 1 month, 6 months, and 1 year in the future.
-5. SOCRATIC INQUIRY: Ask 3 questions that cannot be answered with simple reassurance.
+4. PRE-MORTEM TIMELINE: Simulate failure states at 1 month, 6 months, and 1 year in the future based on Gary Klein's Pre-Mortem protocol.
+5. FALSIFICATION PROTOCOL: Provide actionable 48-hour empirical tests/experiments for unstated assumptions before committing.
+6. EPISTEMIC RIGOR BREAKDOWN: Calculate bias density, assumption fragility index, and systemic risk exposure level.
+7. SOCRATIC INQUIRY: Ask 3 questions that cannot be answered with simple reassurance.
 
 You must structure your response strictly according to the provided schema.
 """
@@ -72,7 +75,7 @@ class BlindSpotEngine:
         )
 
         prompt = f"""
-Evaluate the following user decision context. Uncover unstated assumptions, overlooked risks, alternative stakeholder perspectives, and simulate a pre-mortem timeline without making the decision for them:
+Evaluate the following user decision context. Uncover unstated assumptions, overlooked risks, alternative stakeholder perspectives, calculate epistemic rigor indices, and simulate a pre-mortem timeline without making the decision for them:
 
 DECISION CONTEXT:
 "{text}"
@@ -89,6 +92,12 @@ DECISION CONTEXT:
             return BlindSpotAnalysis(
                 decision_summary="Evaluating a 6-month corporate internship offer balanced against college 75% attendance rules and upcoming semester exams.",
                 thoughtfulness_score=38,
+                epistemic_rigor=EpistemicRigorBreakdown(
+                    bias_density_score=78,
+                    assumption_fragility_index=85,
+                    risk_exposure_level="Critical Systemic",
+                    decision_framework_applied="Kahneman System 1 Salience & Klein Pre-Mortem Audit"
+                ),
                 salient_factors=[
                     "₹35,000/month immediate cash stipend",
                     "15-minute commute eliminating travel fatigue",
@@ -98,17 +107,20 @@ DECISION CONTEXT:
                     CognitiveBias(
                         name="Salience Bias & Availability Heuristic",
                         description="Anchoring heavily on tangible upfront perks (stipend and location) while severely discounting abstract academic penalties.",
-                        severity="High"
+                        severity="High",
+                        framework_reference="Kahneman & Tversky (1974) Availability & Salience Model"
                     ),
                     CognitiveBias(
                         name="Planning Fallacy",
                         description="Assuming that 45-hour workweeks will leave sufficient cognitive stamina to self-study semester curricula on weekends.",
-                        severity="High"
+                        severity="High",
+                        framework_reference="Kahneman & Tversky (1979) Planning Fallacy Protocol"
                     ),
                     CognitiveBias(
                         name="Optimism Bias",
                         description="Believing the college administration will grant attendance waivers without verifying official departmental policy.",
-                        severity="Medium"
+                        severity="Medium",
+                        framework_reference="Sharot (2011) Optimism Bias Spectrum"
                     )
                 ],
                 unstated_assumptions=[
@@ -116,19 +128,22 @@ DECISION CONTEXT:
                         premise="The college department will accept medical notes and informally forgive the 75% attendance requirement.",
                         category="Policy & Institutional",
                         confidence_level="Fragile Anecdote",
-                        vulnerability="Accreditation audits frequently force universities to strictly lock exam hall tickets automatically."
+                        vulnerability="Accreditation audits frequently force universities to strictly lock exam hall tickets automatically.",
+                        falsification_protocol="Obtain a written, signed attendance exemption memo from the Head of Department (HOD) before accepting the offer."
                     ),
                     Assumption(
                         premise="The role of Junior Developer at a consultancy guarantees hands-on software engineering rather than repetitive client maintenance.",
                         category="Quality & Value",
                         confidence_level="Unverified Guess",
-                        vulnerability="Early-career consultancies often utilize interns for manual data formatting or legacy bug-patching with minimal mentorship."
+                        vulnerability="Early-career consultancies often utilize interns for manual data formatting or legacy bug-patching with minimal mentorship.",
+                        falsification_protocol="Ask the hiring manager for 2 sample Git pull requests or codebase tasks assigned to interns in the previous cohort."
                     ),
                     Assumption(
                         premise="Personal cognitive stamina is sufficient to study complex engineering courses on weekends after 9-hour workdays.",
                         category="Feasibility & Bandwidth",
                         confidence_level="Unverified Guess",
-                        vulnerability="Cumulative physical and mental exhaustion causes severe burnout, leading to exam failure or course drops."
+                        vulnerability="Cumulative physical and mental exhaustion causes severe burnout, leading to exam failure or course drops.",
+                        falsification_protocol="Simulate a 9-hour workday regime for 3 consecutive days while studying 3 hours of semester material each evening."
                     )
                 ],
                 overlooked_risks=[
@@ -137,21 +152,24 @@ DECISION CONTEXT:
                         risk_category="Personal & Academic",
                         risk_type="Immediate Operational",
                         failure_scenario="Strict automated attendance tracking blocks hall ticket generation, resulting in mandatory course repeats.",
-                        severity="Critical"
+                        severity="Critical",
+                        stress_test_question="If an automated audit locks your hall ticket 2 weeks before exams, what is your official institutional appeal path?"
                     ),
                     OverlookedRisk(
                         risk_title="Final Campus Placement Disqualification",
                         risk_category="Financial",
                         risk_type="Long-Term Opportunity Cost",
                         failure_scenario="Locking into a 6-month consultancy contract blocks you from appearing for Tier-1 on-campus company drives offering 4x higher packages.",
-                        severity="Critical"
+                        severity="Critical",
+                        stress_test_question="Does your internship contract contain an exclusivity or non-compete clause that blocks participating in campus drives?"
                     ),
                     OverlookedRisk(
                         risk_title="Unsupervised Engineering Stagnation",
                         risk_category="Operational",
                         risk_type="Second-Order Consequence",
                         failure_scenario="Lack of senior code reviews results in reinforcing bad software practices without acquiring modern architectural skills.",
-                        severity="High"
+                        severity="High",
+                        stress_test_question="Who specifically will be your assigned 1-on-1 Senior Staff Engineer mentor, and how often are code reviews conducted?"
                     )
                 ],
                 alternative_perspectives=[
@@ -201,6 +219,12 @@ DECISION CONTEXT:
             return BlindSpotAnalysis(
                 decision_summary="Considering dropping out of university to pursue an early-stage startup prototype full-time.",
                 thoughtfulness_score=32,
+                epistemic_rigor=EpistemicRigorBreakdown(
+                    bias_density_score=82,
+                    assumption_fragility_index=90,
+                    risk_exposure_level="High Systemic Risk",
+                    decision_framework_applied="Blank Customer Development & Taleb Antifragility Model"
+                ),
                 salient_factors=[
                     "Excitement around initial prototype and early peer praise",
                     "Desire to move at startup speed without academic friction",
@@ -210,12 +234,14 @@ DECISION CONTEXT:
                     CognitiveBias(
                         name="Survivorship Bias",
                         description="Focusing exclusively on the 0.01% of dropouts who founded multi-billion dollar companies while ignoring the 99.9% who struggled with accreditation barriers.",
-                        severity="High"
+                        severity="High",
+                        framework_reference="Wald (1943) Survivorship Bias Protocol"
                     ),
                     CognitiveBias(
                         name="False Consensus Effect",
                         description="Assuming praise from friends and early testers translates directly into willingness-to-pay from strangers.",
-                        severity="High"
+                        severity="High",
+                        framework_reference="Ross, Greene & House (1977) Cognitive Consensus Distortion"
                     )
                 ],
                 unstated_assumptions=[
@@ -223,13 +249,15 @@ DECISION CONTEXT:
                         premise="Building a working prototype is the hardest milestone in creating a sustainable software company.",
                         category="Quality & Value",
                         confidence_level="Unverified Guess",
-                        vulnerability="Distribution, customer acquisition costs, and customer churn are exponentially harder than writing the initial codebase."
+                        vulnerability="Distribution, customer acquisition costs, and customer churn are exponentially harder than writing the initial codebase.",
+                        falsification_protocol="Collect 5 non-refundable pre-orders or pre-commitments from un-affiliated strangers before dropping out."
                     ),
                     Assumption(
                         premise="Personal runway and parental support will remain flexible indefinitely during pre-revenue experimentation.",
                         category="Financial & Career",
                         confidence_level="Fragile Anecdote",
-                        vulnerability="Pre-revenue stress strains relationships and forces panicked compromises when personal burn rate accelerates."
+                        vulnerability="Pre-revenue stress strains relationships and forces panicked compromises when personal burn rate accelerates.",
+                        falsification_protocol="Draft a strict 6-month financial budget and verify explicit parental or investor commitment in writing."
                     )
                 ],
                 overlooked_risks=[
@@ -238,14 +266,16 @@ DECISION CONTEXT:
                         risk_category="Financial",
                         risk_type="Immediate Operational",
                         failure_scenario="Customer acquisition costs (CAC) exceed customer lifetime value (LTV), exhausting cash reserves before reaching product-market fit.",
-                        severity="Critical"
+                        severity="Critical",
+                        stress_test_question="What is your measured customer acquisition cost (CAC) across cold channels vs organic traffic?"
                     ),
                     OverlookedRisk(
                         risk_title="Irreversible Credential Forfeiture",
                         risk_category="Personal & Academic",
                         risk_type="Long-Term Opportunity Cost",
                         failure_scenario="If the venture stalls in 12 months, re-enrolling or applying for corporate/visa roles without a degree presents severe friction.",
-                        severity="High"
+                        severity="High",
+                        stress_test_question="Have you confirmed your university's official policy for sabbatical or leave-of-absence versus formal drop-out?"
                     )
                 ],
                 alternative_perspectives=[
@@ -290,6 +320,12 @@ DECISION CONTEXT:
             return BlindSpotAnalysis(
                 decision_summary="Evaluating a proposal to decompose a monolithic backend architecture into distributed microservices.",
                 thoughtfulness_score=45,
+                epistemic_rigor=EpistemicRigorBreakdown(
+                    bias_density_score=65,
+                    assumption_fragility_index=72,
+                    risk_exposure_level="Moderate Operational",
+                    decision_framework_applied="Conway's Law & Architecture Trade-off Analysis Method (ATAM)"
+                ),
                 salient_factors=[
                     "Independent deployment velocity across engineering squads",
                     "Modern technology resume branding for team members",
@@ -299,12 +335,14 @@ DECISION CONTEXT:
                     CognitiveBias(
                         name="Premature Optimization",
                         description="Architecting for hypothetical hyper-scale before current user traffic demands distributed complexity.",
-                        severity="High"
+                        severity="High",
+                        framework_reference="Knuth (1974) Premature Optimization Principle"
                     ),
                     CognitiveBias(
                         name="Shiny Object Syndrome",
                         description="Overweighting industry buzzwords over real-world organizational and operational maintenance overhead.",
-                        severity="Medium"
+                        severity="Medium",
+                        framework_reference="Gartner Hype Cycle Dynamics"
                     )
                 ],
                 unstated_assumptions=[
@@ -312,13 +350,15 @@ DECISION CONTEXT:
                         premise="Network latency and distributed inter-service communication overhead will be negligible.",
                         category="Feasibility & Bandwidth",
                         confidence_level="Unverified Guess",
-                        vulnerability="Distributed transactions, eventual consistency bugs, and network serialization introduce severe latency cascades."
+                        vulnerability="Distributed transactions, eventual consistency bugs, and network serialization introduce severe latency cascades.",
+                        falsification_protocol="Run a gRPC vs REST benchmark under simulated 50ms network jitter to measure latency impact on p99 requests."
                     ),
                     Assumption(
                         premise="The current engineering team possesses mature DevOps, distributed tracing, and Kubernetes orchestration expertise.",
                         category="Quality & Value",
                         confidence_level="Fragile Anecdote",
-                        vulnerability="Microservices shift engineering complexity from application code into infrastructure and telemetry monitoring."
+                        vulnerability="Microservices shift engineering complexity from application code into infrastructure and telemetry monitoring.",
+                        falsification_protocol="Audit current team incident response: time taken to diagnose a multi-service distributed transaction failure."
                     )
                 ],
                 overlooked_risks=[
@@ -327,14 +367,16 @@ DECISION CONTEXT:
                         risk_category="Operational",
                         risk_type="Immediate Operational",
                         failure_scenario="A transient timeout in an auxiliary service brings down the entire checkout pipeline with un-debuggable distributed traces.",
-                        severity="Critical"
+                        severity="Critical",
+                        stress_test_question="Do you have circuit breakers and fallback responses configured for every inter-service network call?"
                     ),
                     OverlookedRisk(
                         risk_title="Cloud Infrastructure Cost Explosion",
                         risk_category="Financial",
                         risk_type="Second-Order Consequence",
                         failure_scenario="Cross-AZ data egress fees, multi-cluster managed control planes, and idle compute drive AWS/GCP bills up 300%.",
-                        severity="High"
+                        severity="High",
+                        stress_test_question="What is the projected cloud egress and infrastructure cost per active user under microservices vs monolith?"
                     )
                 ],
                 alternative_perspectives=[
@@ -374,11 +416,17 @@ DECISION CONTEXT:
                 non_prescriptive_guarantee="The Blind Spot never decides for you. It illuminates what you cannot see so you can decide with 100% clarity."
             )
 
-        # Scenario 4: Relocating to a New City for Work / Generic
+        # Scenario 4: Relocating / Generic High-Stakes Decision
         else:
             return BlindSpotAnalysis(
                 decision_summary=f"Evaluating high-stakes decision: {text[:90]}...",
                 thoughtfulness_score=48,
+                epistemic_rigor=EpistemicRigorBreakdown(
+                    bias_density_score=70,
+                    assumption_fragility_index=75,
+                    risk_exposure_level="Moderate Systemic",
+                    decision_framework_applied="Raiffa Decision Tree & Expected Value Analysis"
+                ),
                 salient_factors=[
                     "Promised compensation and upside benefits",
                     "Novelty and excitement of a new operational chapter",
@@ -388,12 +436,14 @@ DECISION CONTEXT:
                     CognitiveBias(
                         name="Affect Heuristic & Optimism Bias",
                         description="Letting positive initial emotional enthusiasm mask the logistical friction and hidden recurring costs.",
-                        severity="Medium"
+                        severity="Medium",
+                        framework_reference="Slovic et al. (2007) Affect Heuristic Model"
                     ),
                     CognitiveBias(
                         name="Confirmation Bias",
                         description="Collecting arguments supporting the move while avoiding deep conversations with those who experienced negative outcomes.",
-                        severity="High"
+                        severity="High",
+                        framework_reference="Wason (1960) Confirmation Bias Framework"
                     )
                 ],
                 unstated_assumptions=[
@@ -401,13 +451,15 @@ DECISION CONTEXT:
                         premise="Personal adaptability, energy, and social support can be reconstituted immediately without friction.",
                         category="Feasibility & Bandwidth",
                         confidence_level="Fragile Anecdote",
-                        vulnerability="Relocation and environmental resets carry high cognitive loads that temporarily diminish productivity."
+                        vulnerability="Relocation and environmental resets carry high cognitive loads that temporarily diminish productivity.",
+                        falsification_protocol="Spend 3 full working days in the target environment running your daily routine before signing binding agreements."
                     ),
                     Assumption(
                         premise="All secondary stakeholders (family, partners, teams) will adapt with zero long-term conflict.",
                         category="Policy & Institutional",
                         confidence_level="Unverified Guess",
-                        vulnerability="Unexpressed partner or familial dissatisfaction often leads to early abandonment."
+                        vulnerability="Unexpressed partner or familial dissatisfaction often leads to early abandonment.",
+                        falsification_protocol="Conduct an open 1-on-1 alignment session with affected stakeholders to document explicit concerns."
                     )
                 ],
                 overlooked_risks=[
@@ -416,14 +468,16 @@ DECISION CONTEXT:
                         risk_category="Financial",
                         risk_type="Immediate Operational",
                         failure_scenario="Unexpected localized inflation, taxes, and logistical overhead negate the entire projected financial upside.",
-                        severity="High"
+                        severity="High",
+                        stress_test_question="Have you built a line-item localized budget accounting for tax brackets, lease security deposits, and insurance?"
                     ),
                     OverlookedRisk(
                         risk_title="Irreversible Social Capital Depletion",
                         risk_category="Personal & Academic",
                         risk_type="Long-Term Opportunity Cost",
                         failure_scenario="Severing trusted local support networks leaves you isolated during high-stress operational phases.",
-                        severity="Moderate"
+                        severity="Moderate",
+                        stress_test_question="What is your plan to maintain professional mentor connections after changing physical locations?"
                     )
                 ],
                 alternative_perspectives=[
@@ -483,3 +537,4 @@ Maintain strict non-prescriptive neutrality: NEVER tell them what to decide.
                 "Ask yourself: If this informal assurance is rescinded tomorrow by a change in management or policy, what verified fallback prevents failure?"
             )
         }
+

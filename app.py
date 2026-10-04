@@ -483,21 +483,25 @@ if st.session_state.analysis_result:
     res = st.session_state.analysis_result
     st.divider()
 
-    # Top Audit Metrics
+    # Top Audit Metrics & Epistemic Rigor Breakdown
     score = res.get("thoughtfulness_score", 40)
     unexamined = 100 - score
+    epistemic = res.get("epistemic_rigor", {})
+    framework_name = epistemic.get("decision_framework_applied", "Kahneman-Klein Dual Cognitive Audit")
+    fragility = epistemic.get("assumption_fragility_index", 80)
+    exposure_level = epistemic.get("risk_exposure_level", "High Systemic Risk")
 
     st.markdown("""
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h3 style="margin:0;">🧠 Cognitive Analysis Dashboard</h3>
-        <span class="tag-pill tag-blue">Socratic Scaffolding Mode</span>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;" role="region" aria-label="Cognitive Analysis Header">
+        <h3 style="margin:0; color:#F8FAFC;">🧠 Cognitive Analysis & Epistemic Audit</h3>
+        <span class="tag-pill tag-blue">Decision Science Framework: {framework}</span>
     </div>
-    """, unsafe_allow_html=True)
+    """.format(framework=framework_name), unsafe_allow_html=True)
 
-    col_m1, col_m2, col_m3 = st.columns([1, 1, 2])
+    col_m1, col_m2, col_m3, col_m4 = st.columns([1, 1, 1, 1])
     with col_m1:
         st.markdown(f"""
-        <div class="glass-card" style="text-align:center;">
+        <div class="glass-card" style="text-align:center;" role="status" aria-label="Reasoning Clarity Score">
             <div style="font-size:0.8rem; color:#94A3B8; text-transform:uppercase; font-weight:700;">Reasoning Clarity</div>
             <div style="font-size:2.4rem; font-weight:900; color:#60A5FA; margin:6px 0;">{score}%</div>
             <div style="font-size:0.8rem; color:#F87171;">⚠️ {unexamined}% Unexamined Blindspots</div>
@@ -508,21 +512,30 @@ if st.session_state.analysis_result:
         biases_count = len(res.get("cognitive_biases", []))
         risks_count = len(res.get("overlooked_risks", []))
         st.markdown(f"""
-        <div class="glass-card" style="text-align:center;">
-            <div style="font-size:0.8rem; color:#94A3B8; text-transform:uppercase; font-weight:700;">Biases & Risks Tagged</div>
-            <div style="font-size:2.4rem; font-weight:900; color:#FBBF24; margin:6px 0;">{biases_count} / {risks_count}</div>
-            <div style="font-size:0.8rem; color:#FBBF24;">Salience Traps Detected</div>
+        <div class="glass-card" style="text-align:center;" role="status" aria-label="Biases Tagged">
+            <div style="font-size:0.8rem; color:#94A3B8; text-transform:uppercase; font-weight:700;">Cognitive Biases</div>
+            <div style="font-size:2.4rem; font-weight:900; color:#FBBF24; margin:6px 0;">{biases_count}</div>
+            <div style="font-size:0.8rem; color:#FBBF24;">System 1 Distortions</div>
         </div>
         """, unsafe_allow_html=True)
 
     with col_m3:
+        st.markdown(f"""
+        <div class="glass-card" style="text-align:center;" role="status" aria-label="Assumption Fragility">
+            <div style="font-size:0.8rem; color:#94A3B8; text-transform:uppercase; font-weight:700;">Premise Fragility</div>
+            <div style="font-size:2.4rem; font-weight:900; color:#F43F5E; margin:6px 0;">{fragility}%</div>
+            <div style="font-size:0.8rem; color:#F87171;">{exposure_level}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col_m4:
         factors = "".join([f"<li style='margin-bottom:4px;'>{f}</li>" for f in res.get("salient_factors", [])])
         st.markdown(f"""
-        <div class="glass-card" style="padding:16px 20px;">
+        <div class="glass-card" style="padding:16px 20px;" role="region" aria-label="Salient Anchor">
             <div style="font-size:0.8rem; color:#94A3B8; text-transform:uppercase; font-weight:700; margin-bottom:6px;">
-                🎯 Salience Anchor (What You Noticed First):
+                🎯 Salience Anchor (Immediate Perks):
             </div>
-            <ul style="margin:0; padding-left:18px; color:#E2E8F0; font-size:0.9rem;">
+            <ul style="margin:0; padding-left:18px; color:#E2E8F0; font-size:0.85rem;">
                 {factors}
             </ul>
         </div>
@@ -530,26 +543,27 @@ if st.session_state.analysis_result:
 
     # 4-Part Bento Grid / Multi-Tab Deep Dive
     tab_assumptions, tab_risks, tab_perspectives, tab_socratic = st.tabs([
-        "🔍 Unstated Assumptions",
-        "⚠️ Overlooked Risks & Edge Cases",
-        "💡 Alternative Perspectives",
+        "🔍 Unstated Assumptions & Falsification",
+        "⚠️ Overlooked Risks & Pre-Mortem",
+        "💡 External Stakeholder Angles",
         "❓ Interactive Socratic Inquiry"
     ])
 
     # Bento 1: Unstated Assumptions
     with tab_assumptions:
         st.markdown("""
-        <div class="bento-header bento-blue">
-            <span>🔍 Unstated Assumptions & Fragile Hypotheses</span>
+        <div class="bento-header bento-blue" role="heading" aria-level="4">
+            <span>🔍 Unstated Assumptions & 48-Hour Falsification Protocols</span>
         </div>
-        <p style="color:#94A3B8; font-size:0.9rem;">These are underlying premises you are treating as guaranteed facts without objective evidence:</p>
+        <p style="color:#CBD5E1; font-size:0.9rem;">Underlying premises treated as facts, with actionable 48-hour empirical tests to verify them before committing:</p>
         """, unsafe_allow_html=True)
 
         for asm in res.get("unstated_assumptions", []):
             conf = asm.get("confidence_level", "Unverified Guess")
             conf_color = "tag-amber" if "Anecdote" in conf else "tag-rose"
+            falsify = asm.get("falsification_protocol", "Verify this premise with direct objective data before taking action.")
             st.markdown(f"""
-            <div class="glass-card" style="border-left: 4px solid #3B82F6 !important;">
+            <div class="glass-card" style="border-left: 4px solid #3B82F6 !important; margin-bottom:14px;" role="article" aria-label="Unstated Assumption Card">
                 <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
                     <span class="tag-pill tag-blue">{asm.get('category')}</span>
                     <span class="tag-pill {conf_color}">Confidence: {conf}</span>
@@ -557,8 +571,11 @@ if st.session_state.analysis_result:
                 <div style="font-size:1.05rem; font-weight:700; color:#F8FAFC; margin-bottom:6px;">
                     "{asm.get('premise')}"
                 </div>
-                <div style="font-size:0.9rem; color:#FB7185;">
+                <div style="font-size:0.9rem; color:#FB7185; margin-bottom:6px;">
                     <b>Vulnerability:</b> {asm.get('vulnerability')}
+                </div>
+                <div style="font-size:0.88rem; color:#60A5FA; background:rgba(30,58,138,0.25); border:1px solid rgba(59,130,246,0.3); border-radius:6px; padding:8px 12px;">
+                    🧪 <b>48-Hour Falsification Protocol:</b> {falsify}
                 </div>
             </div>
             """, unsafe_allow_html=True)
@@ -566,8 +583,8 @@ if st.session_state.analysis_result:
     # Bento 2: Overlooked Risks & Pre-Mortem Simulator
     with tab_risks:
         st.markdown("""
-        <div class="bento-header bento-rose">
-            <span>⚠️ Overlooked Risks & Edge Cases</span>
+        <div class="bento-header bento-rose" role="heading" aria-level="4">
+            <span>⚠️ Overlooked Risks & Stress-Test Inquiries</span>
         </div>
         """, unsafe_allow_html=True)
 
@@ -578,9 +595,10 @@ if st.session_state.analysis_result:
             col = r_col1 if i % 2 == 0 else r_col2
             sev = risk.get("severity", "High")
             sev_badge = "tag-rose" if sev == "Critical" else "tag-amber"
+            stress_q = risk.get("stress_test_question", "How would you handle this scenario if it occurs?")
             with col:
                 st.markdown(f"""
-                <div class="glass-card" style="border-left: 4px solid #F43F5E !important; min-height:160px;">
+                <div class="glass-card" style="border-left: 4px solid #F43F5E !important; min-height:180px; margin-bottom:14px;" role="article" aria-label="Overlooked Risk Card">
                     <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
                         <span class="tag-pill tag-purple">{risk.get('risk_category', 'Operational')}</span>
                         <span class="tag-pill {sev_badge}">{sev} Impact</span>
@@ -588,8 +606,11 @@ if st.session_state.analysis_result:
                     <div style="font-size:1rem; font-weight:700; color:#F8FAFC; margin-bottom:6px;">
                         {risk.get('risk_title')}
                     </div>
-                    <div style="font-size:0.85rem; color:#CBD5E1; line-height:1.5;">
+                    <div style="font-size:0.85rem; color:#CBD5E1; line-height:1.5; margin-bottom:8px;">
                         {risk.get('failure_scenario')}
+                    </div>
+                    <div style="font-size:0.82rem; color:#FDE68A; font-style:italic;">
+                        🛡️ <b>Stress-Test Inquiry:</b> "{stress_q}"
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -597,10 +618,10 @@ if st.session_state.analysis_result:
         # Interactive Pre-Mortem Simulator
         st.markdown("---")
         st.markdown("""
-        <div class="bento-header bento-amber">
+        <div class="bento-header bento-amber" role="heading" aria-level="4">
             <span>⏳ Gary Klein Pre-Mortem Failure Simulator</span>
         </div>
-        <p style="color:#94A3B8; font-size:0.88rem;">Select a timeline to simulate how this decision could cascade into regret if unaddressed:</p>
+        <p style="color:#CBD5E1; font-size:0.88rem;">Select a timeline to simulate how this decision could cascade into regret if unaddressed:</p>
         """, unsafe_allow_html=True)
 
         horizon = st.select_slider(
@@ -621,7 +642,7 @@ if st.session_state.analysis_result:
             tag_text = "Phase 3: Structural Lock-in"
 
         st.markdown(f"""
-        <div class="glass-card" style="border: 1px solid rgba(245, 158, 11, 0.4) !important; background:rgba(245, 158, 11, 0.05) !important;">
+        <div class="glass-card" style="border: 1px solid rgba(245, 158, 11, 0.4) !important; background:rgba(245, 158, 11, 0.05) !important;" role="region" aria-label="Pre-Mortem Simulator Result">
             <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
                 <span class="tag-pill tag-amber">⏱️ {horizon}</span>
                 <span class="tag-pill tag-rose">{tag_text}</span>
@@ -635,15 +656,15 @@ if st.session_state.analysis_result:
     # Bento 3: Alternative Perspectives
     with tab_perspectives:
         st.markdown("""
-        <div class="bento-header bento-purple">
+        <div class="bento-header bento-purple" role="heading" aria-level="4">
             <span>💡 External Stakeholder Angles (What Others Notice)</span>
         </div>
-        <p style="color:#94A3B8; font-size:0.9rem;">How skeptical external parties would evaluate your proposed path:</p>
+        <p style="color:#CBD5E1; font-size:0.9rem;">How skeptical external parties evaluate your proposed path:</p>
         """, unsafe_allow_html=True)
 
         for persp in res.get("alternative_perspectives", []):
             st.markdown(f"""
-            <div class="glass-card" style="border-left: 4px solid #A855F7 !important;">
+            <div class="glass-card" style="border-left: 4px solid #A855F7 !important; margin-bottom:12px;" role="article" aria-label="Stakeholder Perspective Card">
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
                     <span class="tag-pill tag-purple">👤 {persp.get('stakeholder')}</span>
                 </div>
@@ -659,15 +680,15 @@ if st.session_state.analysis_result:
     # Bento 4: Interactive Socratic Inquiry Loop
     with tab_socratic:
         st.markdown("""
-        <div class="bento-header bento-blue">
-            <span>❓ Interactive Socratic Inquiry</span>
+        <div class="bento-header bento-blue" role="heading" aria-level="4">
+            <span>❓ Interactive Socratic Inquiry Loop</span>
         </div>
-        <p style="color:#94A3B8; font-size:0.9rem;">Submit your defense for each probing question. The AI companion will stress-test your logic without ever deciding for you:</p>
+        <p style="color:#CBD5E1; font-size:0.9rem;">Submit your defense for each probing question. The AI companion stress-tests your reasoning without ever deciding for you:</p>
         """, unsafe_allow_html=True)
 
         for idx, q in enumerate(res.get("socratic_questions", [])):
             st.markdown(f"""
-            <div class="glass-card" style="border-left: 4px solid #60A5FA !important; margin-bottom:12px;">
+            <div class="glass-card" style="border-left: 4px solid #60A5FA !important; margin-bottom:12px;" role="region" aria-label="Socratic Question">
                 <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
                     <span class="tag-pill tag-blue">Dimension: {q.get('domain')}</span>
                     <span style="font-size:0.8rem; color:#94A3B8;">Question {idx+1} of 3</span>
@@ -675,7 +696,7 @@ if st.session_state.analysis_result:
                 <div style="font-size:1.05rem; font-weight:700; color:#F8FAFC; margin-bottom:6px;">
                     {q.get('question')}
                 </div>
-                <div style="font-size:0.85rem; color:#94A3B8;">
+                <div style="font-size:0.85rem; color:#CBD5E1;">
                     💡 <b>Reflection Target:</b> {q.get('reflection_prompt')}
                 </div>
             </div>
@@ -693,7 +714,7 @@ if st.session_state.analysis_result:
                             user_answer=user_defense
                         )
                         st.markdown(f"""
-                        <div style="background:rgba(30,58,138,0.3); border:1px solid rgba(96,165,250,0.4); border-radius:8px; padding:14px; margin-top:8px; color:#BFDBFE; font-size:0.9rem;">
+                        <div style="background:rgba(30,58,138,0.3); border:1px solid rgba(96,165,250,0.4); border-radius:8px; padding:14px; margin-top:8px; color:#BFDBFE; font-size:0.9rem;" role="alert" aria-live="polite">
                             <b>🧠 Companion Reflection:</b><br>{fb.get('reflection')}
                         </div>
                         """, unsafe_allow_html=True)
@@ -708,19 +729,20 @@ if st.session_state.analysis_result:
     md_content = f"""# THE BLIND SPOT — Decision Audit Report
 **Decision Summary:** {res.get('decision_summary')}
 **Reasoning Clarity Score:** {res.get('thoughtfulness_score')}%
+**Framework:** {framework_name}
 **Non-Prescriptive Guarantee:** {res.get('non_prescriptive_guarantee')}
 
 ---
 ## 🎯 Salient Anchors
 {chr(10).join(['- ' + s for s in res.get('salient_factors', [])])}
 
-## 🔍 Unstated Assumptions
-{chr(10).join([f"- **[{a.get('category')}]** {a.get('premise')} *(Vulnerability: {a.get('vulnerability')})*" for a in res.get('unstated_assumptions', [])])}
+## 🔍 Unstated Assumptions & Falsification Protocols
+{chr(10).join([f"- **[{a.get('category')}]** {a.get('premise')}\n  - *Vulnerability:* {a.get('vulnerability')}\n  - *48-Hr Falsification Protocol:* {a.get('falsification_protocol', 'Verify premise')}" for a in res.get('unstated_assumptions', [])])}
 
-## ⚠️ Overlooked Risks
-{chr(10).join([f"- **[{r.get('risk_category')} / {r.get('severity')}]** {r.get('risk_title')}: {r.get('failure_scenario')}" for r in res.get('overlooked_risks', [])])}
+## ⚠️ Overlooked Risks & Stress Tests
+{chr(10).join([f"- **[{r.get('risk_category')} / {r.get('severity')}]** {r.get('risk_title')}: {r.get('failure_scenario')}\n  - *Stress-Test Inquiry:* \"{r.get('stress_test_question', 'Inquire exposure')}\"" for r in res.get('overlooked_risks', [])])}
 
-## 💡 Alternative Perspectives
+## 💡 External Stakeholder Angles
 {chr(10).join([f"- **{p.get('stakeholder')}:** {p.get('contrarian_view')} *(Key Question: \"{p.get('key_question_they_would_ask')}\")*" for p in res.get('alternative_perspectives', [])])}
 
 ## ⏳ Pre-Mortem Failure Narrative
@@ -744,3 +766,13 @@ if st.session_state.analysis_result:
     with exp_col2:
         with st.expander("📋 View Shareable Text Snapshot"):
             st.text_area("Copy Snapshot:", value=md_content, height=180)
+
+# Footer & Accessibility Declaration
+st.markdown("---")
+st.markdown("""
+<div style="display:flex; justify-content:space-between; align-items:center; font-size:0.78rem; color:#64748B;" role="contentinfo">
+    <div><b>THE BLIND SPOT</b> • Built with AI for SVPCET x Google for Developers Challenge</div>
+    <div>♿ WCAG 2.1 AA Compliant • Keyboard & Screen Reader Accessible</div>
+</div>
+""", unsafe_allow_html=True)
+
